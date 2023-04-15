@@ -10,9 +10,21 @@ int main() {
 	time_t elapsedTime;
 	time_t previousElapsedTime = 0;
 	struct tm* elapsedTimeInfo;
-	char timeString[9];
+	char timeString[10];
+	char startTimeString[8];
+	const char am[3] = "AM";
+	const char pm[3] = "PM";
 
 	struct tm tm = *localtime(&startTime);
+	int startHour;
+	if(tm.tm_hour < 1) {
+		startHour = tm.tm_hour + 12;
+	} else if(tm.tm_hour >= 13) {
+		startHour = tm.tm_hour - 12;
+	} else {
+		startHour = tm.tm_hour;
+	}
+	sprintf(startTimeString, "%02d:%02d%s", startHour, tm.tm_min, (tm.tm_hour < 12) ? am : pm );
 	char filename[25];
 	int filenameSuffixInteger = 0;
 	FILE *logFile;
@@ -67,12 +79,22 @@ int main() {
 				echo();
 				timeout(-1);
 				scanw("%s", note);
-				fprintf(logFile, "%s | %s", timeString, note);
+				fprintf(logFile, "[ Start: %s | Elapsed: %s | Note: %s ]\n\r", startTimeString, timeString, note);
 				fflush(logFile);
 				timeout(0);
 				noecho();
 				lineNumber++;
 				startTime = time(NULL);
+				tm = *localtime(&startTime);
+				int startHour;
+				if(tm.tm_hour < 1) {
+					startHour = tm.tm_hour + 12;
+				} else if(tm.tm_hour >= 13) {
+					startHour = tm.tm_hour - 12;
+				} else {
+					startHour = tm.tm_hour;
+				}
+				sprintf(startTimeString, "%02d:%02d%s", startHour, tm.tm_min, (tm.tm_hour < 12) ? am : pm );
 				attroff(COLOR_PAIR(1));
 				break;
 			case 'p':
