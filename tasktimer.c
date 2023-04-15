@@ -36,7 +36,7 @@ int main() {
 	cbreak();
 	noecho();
 	nodelay(stdscr, TRUE);
-
+	
 	while(1) {
 		sprintf( filename, "tasktimer_%02d-%02d-%04d_%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, filenameSuffixInteger );
 		logFile = fopen( filename, "r" );
@@ -69,18 +69,17 @@ int main() {
 
 		switch(input) {
 			case ' ':
-				if(!logFile) {
-					logFile = fopen(filename, "w");
-				}
+				logFile = fopen(filename, "a");
 				char note[100];
 				attron(COLOR_PAIR(1));
 				printw("Note: ");
 				refresh();
 				echo();
 				timeout(-1);
-				scanw("%s", note);
+				getstr(note);
+        		printw("%s",note);
 				fprintf(logFile, "[ Start: %s | Elapsed: %s | Note: %s ]\n\r", startTimeString, timeString, note);
-				fflush(logFile);
+				fclose(logFile);
 				timeout(0);
 				noecho();
 				lineNumber++;
@@ -111,9 +110,6 @@ int main() {
 				timeout(0);
 				break;
 			case 'x':
-				if(logFile) {
-					fclose(logFile);
-				}
 				exit = 1;
 				break;
 			default:
