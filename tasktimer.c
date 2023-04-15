@@ -36,6 +36,24 @@ int main() {
 	cbreak();
 	noecho();
 	nodelay(stdscr, TRUE);
+	
+	while(1) {
+		sprintf( filename, "tasktimer_%02d-%02d-%04d_%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, filenameSuffixInteger );
+		logFile = fopen( filename, "r" );
+		if( logFile != NULL ) {
+			fclose(logFile);
+			filenameSuffixInteger++;
+		} else {
+			initscr();
+			printw("Log file: %s\n\nPress Spacebar to save a time, P to pause, X to exit.\n\nElapsed: 00:00:00 ", filename);
+			refresh();
+			break;
+		}
+	}
+
+	start_color();
+	use_default_colors();
+	init_pair(1, COLOR_GREEN, -1);
 
 	while(!exit) {
 		currentTime = time(NULL);
