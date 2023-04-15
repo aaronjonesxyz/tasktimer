@@ -115,6 +115,7 @@ int main() {
 			default:
 				break;
 		}
+		usleep(100000);
 	}
 	endwin();
 	return 0;
