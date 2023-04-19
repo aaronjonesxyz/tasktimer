@@ -5,6 +5,7 @@
 #include <ncurses.h>
 
 int main() {
+	bool timerStarted = false;
 	time_t startTime = time(NULL);
 	time_t currentTime;
 	time_t elapsedTime;
@@ -45,7 +46,7 @@ int main() {
 			filenameSuffixInteger++;
 		} else {
 			initscr();
-			printw("Log file: %s\n\nPress Spacebar to save a time, P to pause, X to exit.\n\nElapsed: 00:00:00 ", filename);
+			printw("Log file: %s\n\nPress Spacebar to save a time, P to pause, X to exit.\n\nPress space to start... ", filename);
 			refresh();
 			break;
 		}
@@ -56,16 +57,36 @@ int main() {
 	init_pair(1, COLOR_GREEN, -1);
 
 	while(!exit) {
+		char input = getch();
+		if(!timerStarted) {
+			if(input == ' ') {
+				timerStarted = true;
+				startTime = time(NULL);
+				tm = *localtime(&startTime);
+				int startHour;
+				if(tm.tm_hour < 1) {
+					startHour = tm.tm_hour + 12;
+				} else if(tm.tm_hour >= 13) {
+					startHour = tm.tm_hour - 12;
+				} else {
+					startHour = tm.tm_hour;
+				}
+				sprintf(startTimeString, "%02d:%02d%s", startHour, tm.tm_min, (tm.tm_hour < 12) ? am : pm );
+			}
+			continue;
+		}
+
 		currentTime = time(NULL);
 		elapsedTime = currentTime - startTime;
 		if( elapsedTime != previousElapsedTime ) {
 			elapsedTimeInfo = gmtime(&elapsedTime);
 			strftime(timeString, sizeof(timeString), "%H:%M:%S", elapsedTimeInfo);
-			mvprintw(lineNumber, 0, "\rElapsed: %s ", timeString);
+			move(lineNumber, 0);
+			clrtoeol();
+			printw("\rElapsed: %s ", timeString);
 			refresh();
 			previousElapsedTime = elapsedTime;
 		}
-		char input = getch();
 
 		switch(input) {
 			case ' ':
@@ -83,18 +104,9 @@ int main() {
 				timeout(0);
 				noecho();
 				lineNumber++;
-				startTime = time(NULL);
-				tm = *localtime(&startTime);
-				int startHour;
-				if(tm.tm_hour < 1) {
-					startHour = tm.tm_hour + 12;
-				} else if(tm.tm_hour >= 13) {
-					startHour = tm.tm_hour - 12;
-				} else {
-					startHour = tm.tm_hour;
-				}
-				sprintf(startTimeString, "%02d:%02d%s", startHour, tm.tm_min, (tm.tm_hour < 12) ? am : pm );
 				attroff(COLOR_PAIR(1));
+				mvprintw(lineNumber, 0, "\r Paused: 00:00:00 ");
+				timerStarted = false;
 				break;
 			case 'p':
 				getch();
